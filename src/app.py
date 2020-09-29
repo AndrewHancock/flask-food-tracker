@@ -36,8 +36,8 @@ def index():
     qry = """select log_date.entry_date,  sum(food.protein) as protein, (food.carbohydrates) as carbohydrates, 
         sum(food.fat) as fat, sum(food.calories) as calories 
     from log_date 
-    join food_date on food_date.log_date_id = log_date.id 
-    join food on food.id = food_date.food_id
+    left join food_date on food_date.log_date_id = log_date.id 
+    left join food on food.id = food_date.food_id
     group by log_date.entry_date
     order by log_date.entry_date desc"""
     cur = db.execute(qry)
@@ -45,8 +45,11 @@ def index():
 
     date_results = []
     for i in results:
-        single_date = {'entry_date': i['entry_date'], 'protein': i['protein'], 'carbohydrates': i['carbohydrates'],
-                       'fat': i['fat'], 'calories': i['calories']}
+        single_date = {'entry_date': i['entry_date'],
+                       'protein': i['protein'] if i['protein'] is not None else 0,
+                       'carbohydrates': i['carbohydrates'] if i['carbohydrates'] is not None else 0,
+                       'fat': i['fat'] if i['fat'] is not None else 0,
+                       'calories': i['calories'] if i['calories'] is not None else 0}
 
         d = datetime.strptime(str(i['entry_date']), '%Y%m%d')
         single_date['pretty_date'] = datetime.strftime(d, '%B %d %Y')
